@@ -14,6 +14,11 @@ const cors = require("cors");
   The session can be persisted in memory (would not be adecuate for production)
   or you can use a session store like `connect-session-knex`.
  */
+const session = require("express-session");
+const Store = require("connect-session-knex")(session);
+
+const usersRouter = require("./users/users-router.js");
+const authRouter = require("./auth/auth-router.js");
 
 const server = express();
 
@@ -21,11 +26,36 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 
+server.use(
+  session({
+    name: "chocolatechip",
+    secret: process.env.SESSION_SECRET || "keep it secret",
+    cookie: {
+      maxAge: 1000 * 60,
+      secure: false,
+      httpOnly: false,
+    },
+    resave: false,
+    saveUninitialized: false,
+    store: new Store({
+      knex: require("../data/db-config.js"),
+      tablename: "sessions",
+      sidfieldname: "sid",
+      createtable: true,
+      clearInterval: 1000 * 60 * 60,
+    }),
+  })
+);
+
+server.use("/api/users", usersRouter);
+server.use("/api/auth", authRouter);
+
 server.get("/", (req, res) => {
   res.json({ api: "up" });
 });
 
-server.use((err, req, res, next) => { // eslint-disable-line
+server.use((err, req, res, next) => {
+  // eslint-disable-line
   res.status(err.status || 500).json({
     message: err.message,
     stack: err.stack,
