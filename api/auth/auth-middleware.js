@@ -1,4 +1,5 @@
 const User = require("../users/users-model");
+const bcrypt = require("bcryptjs");
 
 function restricted(req, res, next) {
   if (req.session.user) {
@@ -26,8 +27,10 @@ async function checkUsernameExists(req, res, next) {
   next();
 }
 
-function checkPasswordLength(req, res, next) {
-  const { password } = req.body;
+async function checkPasswordLength(req, res, next) {
+  const { username, password } = req.body;
+  // const [user] = await User.findBy({ username });
+  // const goodPass = bcrypt.compareSync(password, user.password);
   if (!password || password.length < 3) {
     return next({
       status: 422,

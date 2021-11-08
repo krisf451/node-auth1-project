@@ -41,29 +41,18 @@ router.post(
 );
 
 router.get("/logout", (req, res, next) => {
-  res.json("logout router is working");
+  if (!req.session.user) {
+    return res.json({ message: "no session" });
+  }
+  req.session.destroy((err) => {
+    if (err) {
+      return res.json({ message: "something went wrong with logging out" });
+    }
+    res.json({ message: "logged out" });
+  });
 });
 
 module.exports = router;
-
-// Require `checkUsernameFree`, `checkUsernameExists` and `checkPasswordLength`
-// middleware functions from `auth-middleware.js`. You will need them here!
-
-/**
-  2 [POST] /api/auth/login { "username": "sue", "password": "1234" }
-
-  response:
-  status 200
-  {
-    "message": "Welcome sue!"
-  }
-
-  response on invalid credentials:
-  status 401
-  {
-    "message": "Invalid credentials"
-  }
- */
 
 /**
   3 [GET] /api/auth/logout
