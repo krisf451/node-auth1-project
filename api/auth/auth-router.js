@@ -32,6 +32,10 @@ router.post(
     try {
       const { username, password } = req.body;
       const [user] = await User.findBy({ username });
+      const goodPass = bcrypt.compareSync(password, user.password);
+      if (!goodPass) {
+        return next({ status: 401, message: "invalid credentials" });
+      }
       req.session.user = user;
       res.json({ message: `welcome ${user.username}!` });
     } catch (error) {
