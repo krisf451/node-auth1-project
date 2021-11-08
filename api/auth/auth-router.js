@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const bcrypt = require("bcryptjs");
 const {
   checkPasswordLength,
   checkUsernameExists,
@@ -6,8 +7,29 @@ const {
 } = require("./auth-middleware");
 const User = require("../users/users-model");
 
-router.get("/", (req, res, next) => {
-  res.json("Auth Router Get Request Working");
+router.post(
+  "/register",
+  checkUsernameFree,
+  checkPasswordLength,
+  async (req, res, next) => {
+    try {
+      const { username, password } = req.body;
+      const hash = bcrypt.hashSync(password, 6);
+      const newUser = { username, password: hash };
+      const result = await User.add(newUser);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post("/login", (req, res, next) => {
+  res.json("login router is working");
+});
+
+router.get("/logout", (req, res, next) => {
+  res.json("logout router is working");
 });
 
 module.exports = router;
