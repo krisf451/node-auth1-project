@@ -24,9 +24,21 @@ router.post(
   }
 );
 
-router.post("/login", (req, res, next) => {
-  res.json("login router is working");
-});
+router.post(
+  "/login",
+  checkUsernameExists,
+  checkPasswordLength,
+  async (req, res, next) => {
+    try {
+      const { username, password } = req.body;
+      const [user] = await User.findBy({ username });
+      req.session.user = user;
+      res.json({ message: `welcome ${user.username}!` });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 router.get("/logout", (req, res, next) => {
   res.json("logout router is working");
@@ -36,29 +48,6 @@ module.exports = router;
 
 // Require `checkUsernameFree`, `checkUsernameExists` and `checkPasswordLength`
 // middleware functions from `auth-middleware.js`. You will need them here!
-
-/**
-  1 [POST] /api/auth/register { "username": "sue", "password": "1234" }
-
-  response:
-  status 200
-  {
-    "user_id": 2,
-    "username": "sue"
-  }
-
-  response on username taken:
-  status 422
-  {
-    "message": "Username taken"
-  }
-
-  response on password three chars or less:
-  status 422
-  {
-    "message": "Password must be longer than 3 chars"
-  }
- */
 
 /**
   2 [POST] /api/auth/login { "username": "sue", "password": "1234" }
