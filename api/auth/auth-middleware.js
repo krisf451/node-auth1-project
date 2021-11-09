@@ -2,10 +2,10 @@ const User = require("../users/users-model");
 const bcrypt = require("bcryptjs");
 
 function restricted(req, res, next) {
-  if (req.session.user) {
-    next();
-  } else {
+  if (!req.session.user) {
     next({ status: 401, message: "You shall not pass!" });
+  } else {
+    next();
   }
 }
 
