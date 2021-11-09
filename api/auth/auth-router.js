@@ -33,7 +33,11 @@ router.post("/login", checkUsernameExists, async (req, res, next) => {
       return next({ status: 401, message: "invalid credentials" });
     }
     req.session.user = user;
-    res.json({ message: `welcome ${user.username}!` });
+    res.json({
+      message: `welcome ${user.username}!`,
+      username: user.username,
+      cookie: Boolean(req.session.user),
+    });
   } catch (error) {
     next(error);
   }
